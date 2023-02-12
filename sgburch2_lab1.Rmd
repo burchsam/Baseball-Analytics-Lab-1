@@ -3,8 +3,8 @@ title: "Lab 1"
 author: "Sam Burch"
 date: "2023-02-04"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
 ***Question 1***
@@ -102,7 +102,7 @@ What went wrong is these outlier seasons, due to different circumstances, had dr
 teams_list = Teams |> 
   select(yearID, W, L, G, AB, H, X2B, X3B, HR, BB, HBP, SF, HA, HRA,
          BBA, SOA, IPouts, FP, R, RA) |> 
-  replace_na(list(HBP =0, SF = 0)) |> 
+  replace_na(list(HBP = 0, SF = 0)) |> 
   mutate(RD = (R - RA) / G) |> 
   mutate(X1B = H - (X2B + X3B + HR)) |> 
   mutate(OBP = (H + BB + HBP) / (AB + BB + HBP + SF)) |> 
@@ -111,7 +111,13 @@ teams_list = Teams |>
   mutate(IP = IPouts / 3) |> 
   mutate(WHIP = (BBA + HA) / IP) |> 
   split(Teams$yearID) |> 
-  lapply(avgOPS = mean(OPS), avgWHIP = mean(WHIP), avgFP = mean(WHIP), mutate) |>
+  lapply(avgOBP = (sum(H) + sum(BB) + sum(HBP)) / (sum(AB) + sum(BB) + sum(HBP) + sum(SF)),
+         avgSLG = (sum(X1B) + 2*sum(X2B) + 3*sum(X3B) + 4*sum(HR)) / sum(AB),
+         avgOPS = avgOBP + avgSLG,
+         avgWHIP = (sum(BBA) + sum(HA)) / sum(IP),
+         #avgFP here is only rough approximation here
+         avgFP = mean(FP), 
+         mutate) |>
   lapply(OPSscale = OPS / avgOPS,
          WHIPscale = avgWHIP / WHIP,
          FPscale = avgFP / FP,
